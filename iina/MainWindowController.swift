@@ -3296,7 +3296,31 @@ class MainWindowController: PlayerWindowController {
       player.screenshot()
     case .plugins:
       showPluginSidebar(tab: nil)
+    case .speed:
+      showSpeedMenu(forView: sender)
     }
+  }
+
+  private func showSpeedMenu(forView view: NSView) {
+    let speeds: [Double] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5]
+    let currentSpeed = player.info.playSpeed
+    let menu = NSMenu()
+    menu.autoenablesItems = false
+    for speed in speeds {
+      let title = speed == 1.0 ? "1.0x (\(NSLocalizedString("osc_toolbar.speed.normal", comment: "Normal")))" : "\(speed)x"
+      let item = menu.addItem(withTitle: title,
+                              action: #selector(self.speedMenuAction(_:)),
+                              target: self,
+                              obj: speed,
+                              stateOn: abs(currentSpeed - speed) < 0.001)
+      item.isEnabled = true
+    }
+    NSMenu.popUpContextMenu(menu, with: NSApp.currentEvent!, for: view)
+  }
+
+  @objc private func speedMenuAction(_ sender: NSMenuItem) {
+    guard let speed = sender.representedObject as? Double else { return }
+    player.setSpeed(speed)
   }
 
   // MARK: - Utility
