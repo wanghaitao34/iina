@@ -402,6 +402,8 @@
 "osc_toolbar.sub_track" = "选择字幕轨道";
 "osc_toolbar.screenshot" = "截图";
 "osc_toolbar.plugins" = "显示插件面板";
+"osc_toolbar.speed" = "播放速度";
+"osc_toolbar.speed.normal" = "正常";
 
 "mini_player.album_art" = "切换专辑封面";
 "mini_player.loop" = "重复";

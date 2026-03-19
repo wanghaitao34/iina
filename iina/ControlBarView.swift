@@ -22,6 +22,9 @@ class ControlBarView: NSVisualEffectView {
   override func awakeFromNib() {
     if #available(macOS 26, *) {
       self.roundCorners(withRadius: 10)
+      self.material = .hudWindow
+      self.blendingMode = .behindWindow
+      self.state = .active
     } else {
       self.roundCorners(withRadius: 6)
     }
