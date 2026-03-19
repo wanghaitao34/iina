@@ -36,6 +36,12 @@ class OpenURLWindowController: NSWindowController, NSTextFieldDelegate, NSContro
     window?.isMovableByWindowBackground = true
     window?.titlebarAppearsTransparent = true
     window?.titleVisibility = .hidden
+
+    // Liquid Glass URL window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     urlStackView.setVisibilityPriority(.notVisible, for: httpPrefixTextField)
     urlField.delegate = self
     ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).forEach {

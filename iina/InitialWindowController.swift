@@ -30,20 +30,35 @@ fileprivate class GrayHighlightRowView: NSTableRowView {
     if self.selectionHighlightStyle != .none {
       let selectionRect = NSInsetRect(self.bounds, 0, 0)
       NSColor.initialWindowLastFileBackground.setFill()
-      let selectionPath = NSBezierPath.init(roundedRect: selectionRect, xRadius: 4, yRadius: 4)
-      selectionPath.fill()
+      if #available(macOS 26, *) {
+        let selectionPath = NSBezierPath.init(roundedRect: selectionRect, xRadius: 8, yRadius: 8)
+        selectionPath.fill()
+      } else {
+        let selectionPath = NSBezierPath.init(roundedRect: selectionRect, xRadius: 4, yRadius: 4)
+        selectionPath.fill()
+      }
     }
   }
 
   func setHoverHighlight() {
     self.wantsLayer = true
-    self.layer?.cornerRadius = 6
+    if #available(macOS 26, *) {
+      self.layer?.cornerRadius = 10
+      self.layer?.cornerCurve = .continuous
+    } else {
+      self.layer?.cornerRadius = 6
+    }
     self.layer?.backgroundColor = NSColor.initialWindowActionButtonBackgroundHover.cgColor
   }
 
   func unsetHoverHighlight() {
     self.wantsLayer = true
-    self.layer?.cornerRadius = 6
+    if #available(macOS 26, *) {
+      self.layer?.cornerRadius = 10
+      self.layer?.cornerCurve = .continuous
+    } else {
+      self.layer?.cornerRadius = 6
+    }
     self.layer?.backgroundColor = NSColor.initialWindowActionButtonBackground.cgColor
   }
 }
@@ -121,6 +136,11 @@ class InitialWindowController: NSWindowController {
     window?.titleVisibility = .hidden
     window?.isMovableByWindowBackground = true
 
+    // Liquid Glass welcome window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     window?.contentView?.registerForDraggedTypes([.nsFilenames, .nsURL, .string])
 
     mainView.wantsLayer = true
@@ -141,7 +161,6 @@ class InitialWindowController: NSWindowController {
       betaIndicatorView.isHidden = false
     case .debug:
       versionLabel.stringValue = "\(version)+g\(InfoDictionary.shared.shortCommitSHA ?? "")"
-      betaIndicatorView.isHidden = false
     }
 
     loadLastPlaybackInfo()
@@ -165,13 +184,29 @@ class InitialWindowController: NSWindowController {
   private func setMaterial(_ theme: Preference.Theme?) {
     guard let window = window, let theme = theme else { return }
     window.appearance = NSAppearance(iinaTheme: theme)
-    if #available(macOS 10.16, *) {
-      let gradientLayer = CAGradientLayer()
-      gradientLayer.colors = window.effectiveAppearance.isDark ?
-        [NSColor.black.withAlphaComponent(0.4).cgColor, NSColor.black.withAlphaComponent(0).cgColor] :
-        [NSColor.black.withAlphaComponent(0.1).cgColor, NSColor.black.withAlphaComponent(0).cgColor]
-      leftOverlayView.wantsLayer = true
-      leftOverlayView.layer = gradientLayer
+    if #available(macOS 26, *) {
+      // Liquid Glass: use translucent gradient overlay
+      if window.effectiveAppearance.isDark {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [NSColor.black.withAlphaComponent(0.3).cgColor, NSColor.black.withAlphaComponent(0).cgColor]
+        leftOverlayView.wantsLayer = true
+        leftOverlayView.layer = gradientLayer
+      } else {
+        leftOverlayView.wantsLayer = true
+        leftOverlayView.layer = nil
+        leftOverlayView.layer?.backgroundColor = NSColor.white.cgColor
+      }
+    } else if #available(macOS 10.16, *) {
+      if window.effectiveAppearance.isDark {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [NSColor.black.withAlphaComponent(0.4).cgColor, NSColor.black.withAlphaComponent(0).cgColor]
+        leftOverlayView.wantsLayer = true
+        leftOverlayView.layer = gradientLayer
+      } else {
+        leftOverlayView.wantsLayer = true
+        leftOverlayView.layer = nil
+        leftOverlayView.layer?.backgroundColor = NSColor.white.cgColor
+      }
     }
   }
 
@@ -368,7 +403,12 @@ class InitialWindowViewActionButton: NSView {
 
   override func awakeFromNib() {
     self.wantsLayer = true
-    self.layer?.cornerRadius = 6
+    if #available(macOS 26, *) {
+      self.layer?.cornerRadius = 10
+      self.layer?.cornerCurve = .continuous
+    } else {
+      self.layer?.cornerRadius = 6
+    }
     self.layer?.backgroundColor = normalBackground.cgColor
     self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: nil))
   }
@@ -435,7 +475,12 @@ class BetaIndicatorView: NSView {
     text1.setHTMLValue(NSLocalizedString("initial." + buildType.rawValue.lowercased() + ".desc", comment: "Build type desc"))
     text2.setHTMLValue(NSLocalizedString("initial.bug_report", comment: "Bug report desc"))
 
-    self.layer?.cornerRadius = 4
+    if #available(macOS 26, *) {
+      self.layer?.cornerRadius = 6
+      self.layer?.cornerCurve = .continuous
+    } else {
+      self.layer?.cornerRadius = 4
+    }
     self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: nil))
   }
 

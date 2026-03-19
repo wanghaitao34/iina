@@ -34,10 +34,19 @@ class ScreenshootOSDView: NSViewController {
     heightConstraint.constant = size!.height
     imageView.image = image
     imageView.wantsLayer = true
-    imageView.layer?.borderColor = NSColor.gridColor.withAlphaComponent(0.6).cgColor
-    imageView.layer?.borderWidth = 1
-    imageView.layer?.cornerRadius = 4
-    imageView.layer?.masksToBounds = true
+    if #available(macOS 26, *) {
+      // Liquid Glass screenshot preview
+      imageView.layer?.cornerRadius = LiquidGlass.cornerRadiusSmall
+      imageView.layer?.cornerCurve = .continuous
+      imageView.layer?.masksToBounds = true
+      imageView.layer?.borderColor = NSColor.white.withAlphaComponent(0.25).cgColor
+      imageView.layer?.borderWidth = LiquidGlass.rimLineWidth
+    } else {
+      imageView.layer?.borderColor = NSColor.gridColor.withAlphaComponent(0.6).cgColor
+      imageView.layer?.borderWidth = 1
+      imageView.layer?.cornerRadius = 4
+      imageView.layer?.masksToBounds = true
+    }
     if fileURL == nil {
       [deleteBtn, editBtn, revealBtn].forEach { $0?.isHidden = true }
       bottomConstraint.constant = 8

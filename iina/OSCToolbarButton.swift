@@ -24,6 +24,13 @@ class OSCToolbarButton {
     let buttonHeight = Preference.ToolBarButton.frameSize
     let buttonWidth = reducedWidth ? Preference.ToolBarButton.compactFrameWidth : Preference.ToolBarButton.frameSize
     Utility.quickConstraints(["H:[btn(\(buttonWidth))]", "V:[btn(\(buttonHeight))]"], ["btn": toolbarButton])
+
+    // Liquid Glass: subtle glass pill background for toolbar buttons
+    if #available(macOS 26, *) {
+      toolbarButton.wantsLayer = true
+      toolbarButton.layer?.cornerRadius = buttonHeight / 2
+      toolbarButton.layer?.cornerCurve = .continuous
+    }
   }
 
   static func buildDragItem(from toolbarButton: NSButton, pasteboardWriter: NSPasteboardWriting,

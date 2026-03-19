@@ -46,17 +46,17 @@
                                     <constraint firstAttribute="width" constant="180" id="rDn-QA-oDN"/>
                                 </constraints>
                             </customView>
-                            <box horizontalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="ixu-yb-qn0">
+                            <box horizontalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" hidden="YES" id="ixu-yb-qn0">
                                 <rect key="frame" x="178" y="1" width="5" height="397"/>
                             </box>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="qTo-HU-gie">
                                 <rect key="frame" x="0.0" y="0.0" width="640" height="399"/>
                                 <subviews>
                                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="nrn-G9-P2A">
-                                        <rect key="frame" x="24" y="239" width="128" height="128"/>
+                                        <rect key="frame" x="50" y="239" width="80" height="80"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="128" id="Wn7-bK-7pD"/>
-                                            <constraint firstAttribute="width" constant="128" id="ZWC-9S-k88"/>
+                                            <constraint firstAttribute="height" constant="80" id="Wn7-bK-7pD"/>
+                                            <constraint firstAttribute="width" constant="80" id="ZWC-9S-k88"/>
                                         </constraints>
                                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="iina_arrow" id="QyS-ah-TEY"/>
                                     </imageView>
@@ -127,9 +127,9 @@
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="fullWidth" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="28" rowSizeStyle="automatic" viewBased="YES" id="VeK-rB-yjt">
                                                     <rect key="frame" x="0.0" y="0.0" width="392" height="245"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                    <size key="intercellSpacing" width="3" height="2"/>
+                                                    <size key="intercellSpacing" width="0" height="0"/>
                                                     <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
-                                                    <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="gridColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                                     <tableColumns>
                                                         <tableColumn width="380" minWidth="40" maxWidth="1000" id="F4F-w2-NPf">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
@@ -290,7 +290,7 @@
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="8hV-gP-tZA" firstAttribute="top" secondItem="nrn-G9-P2A" secondAttribute="bottom" constant="20" id="1Oa-0T-iZV"/>
-                                    <constraint firstItem="nrn-G9-P2A" firstAttribute="leading" secondItem="qTo-HU-gie" secondAttribute="leading" constant="24" id="5PR-Tb-8T7"/>
+                                    <constraint firstItem="nrn-G9-P2A" firstAttribute="leading" secondItem="qTo-HU-gie" secondAttribute="leading" constant="50" id="5PR-Tb-8T7"/>
                                     <constraint firstAttribute="trailing" secondItem="ZGi-N7-Zv2" secondAttribute="trailing" constant="44" id="9ed-4L-5h2"/>
                                     <constraint firstAttribute="trailing" secondItem="hmC-XZ-bFe" secondAttribute="trailing" constant="44" id="B9z-QH-RTT"/>
                                     <constraint firstItem="hmC-XZ-bFe" firstAttribute="leading" secondItem="ZGi-N7-Zv2" secondAttribute="leading" id="Hpy-gh-hYn"/>
@@ -319,7 +319,7 @@
                             <constraint firstAttribute="trailing" secondItem="flK-Zt-USI" secondAttribute="trailing" id="8ha-M9-vjX"/>
                             <constraint firstItem="y68-wa-gJg" firstAttribute="leading" secondItem="Nb0-VN-ptD" secondAttribute="leading" id="C6N-aD-kLo"/>
                             <constraint firstItem="ixu-yb-qn0" firstAttribute="top" secondItem="Nb0-VN-ptD" secondAttribute="top" constant="1" id="F46-OP-CrT"/>
-                            <constraint firstItem="flK-Zt-USI" firstAttribute="leading" secondItem="ZGi-N7-Zv2" secondAttribute="leading" constant="-24" id="Hhf-Pa-QQk"/>
+                            <constraint firstItem="flK-Zt-USI" firstAttribute="leading" secondItem="Nb0-VN-ptD" secondAttribute="leading" id="Hhf-Pa-QQk"/>
                             <constraint firstItem="ixu-yb-qn0" firstAttribute="leading" secondItem="y68-wa-gJg" secondAttribute="trailing" id="P7e-Td-qB6"/>
                             <constraint firstItem="y68-wa-gJg" firstAttribute="top" secondItem="Nb0-VN-ptD" secondAttribute="top" id="VeR-2t-iFd"/>
                             <constraint firstAttribute="bottom" secondItem="ixu-yb-qn0" secondAttribute="bottom" constant="1" id="YGS-fJ-kMf"/>

@@ -275,19 +275,22 @@ CA
                             <menuItem title="Speed:" enabled="NO" id="8pV-XQ-AvB">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
-                            <menuItem title="Speed Up to 2x" id="Lqa-OG-EEg">
+                            <menuItem title="2x 倍速" id="Lqa-OG-EEg">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
-                            <menuItem title="Speed Up to 1.1x" tag="2" alternate="YES" id="91n-xW-L37">
+                            <menuItem title="1.5x 倍速" id="91n-xW-L37">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
-                            <menuItem title="Speed Down to 0.5x" tag="1" id="HsE-LN-Nd6">
+                            <menuItem title="1.25x 倍速" id="j3K-ld-q1x">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
-                            <menuItem title="Speed Down to 0.9x" tag="3" alternate="YES" id="DUP-nm-BJt">
+                            <menuItem title="1x 倍速" id="5Gn-90-oDu">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
-                            <menuItem title="Reset Speed" tag="5" id="5Gn-90-oDu">
+                            <menuItem title="0.75x 倍速" id="DUP-nm-BJt">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="0.5x 倍速" id="HsE-LN-Nd6">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="k1k-sG-1C3"/>
@@ -796,6 +799,7 @@ CA
                 <outlet property="speedDown" destination="HsE-LN-Nd6" id="0ZB-lc-ngV"/>
                 <outlet property="speedDownSlightly" destination="DUP-nm-BJt" id="Ym7-LJ-eQp"/>
                 <outlet property="speedIndicator" destination="8pV-XQ-AvB" id="Hx8-31-Go6"/>
+                <outlet property="speedPreset125x" destination="j3K-ld-q1x" id="kR2-25-spd"/>
                 <outlet property="speedReset" destination="5Gn-90-oDu" id="9fm-wM-PSo"/>
                 <outlet property="speedUp" destination="Lqa-OG-EEg" id="L10-gQ-lO0"/>
                 <outlet property="speedUpSlightly" destination="91n-xW-L37" id="g1t-U3-vQh"/>

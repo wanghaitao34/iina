@@ -242,6 +242,11 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
     guard let window = window, let theme = theme else { return }
 
     window.appearance = NSAppearance(iinaTheme: theme)
+
+    // Liquid Glass: ensure transparent titlebar & no separator on macOS 26+
+    if #available(macOS 26, *) {
+      window.titlebarSeparatorStyle = .none
+    }
   }
 
   // MARK: - Mouse / Trackpad events

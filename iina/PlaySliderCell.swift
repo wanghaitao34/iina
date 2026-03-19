@@ -23,10 +23,10 @@ class PlaySliderCell: NSSliderCell {
     return knobWidth
   }
 
-  let knobWidth: CGFloat = 3
-  let knobHeight: CGFloat = 15
-  let knobRadius: CGFloat = 1
-  let barRadius: CGFloat = 1.5
+  let knobWidth: CGFloat = 4
+  let knobHeight: CGFloat = 16
+  let knobRadius: CGFloat = 1.5
+  let barRadius: CGFloat = 2.0
 
   private var knobColor = NSColor(named: .mainSliderKnob)!
   private var knobActiveColor = NSColor(named: .mainSliderKnobActive)!

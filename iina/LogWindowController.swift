@@ -29,6 +29,11 @@ class LogWindowController: NSWindowController, NSMenuDelegate {
   override func windowDidLoad() {
     super.windowDidLoad()
 
+    // Liquid Glass log window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     logTableView.userInterfaceLayoutDirection = .leftToRight
     logTableView.sizeLastColumnToFit()
     let tableViewMenu = NSMenu()

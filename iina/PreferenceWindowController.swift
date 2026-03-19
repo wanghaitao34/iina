@@ -181,6 +181,11 @@ class PreferenceWindowController: NSWindowController {
     window?.titleVisibility = .hidden
     window?.isMovableByWindowBackground = true
 
+    // Liquid Glass preferences window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     tableView.delegate = self
     tableView.dataSource = self
     completionTableView.delegate = self

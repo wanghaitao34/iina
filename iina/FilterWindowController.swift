@@ -62,6 +62,11 @@ class FilterWindowController: NSWindowController, NSWindowDelegate {
     loaded = true
     window?.delegate = self
 
+    // Liquid Glass filter window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     // title
     window?.title = filterType == MPVProperty.af ? NSLocalizedString("filter.audio_filters", comment: "Audio Filters") : NSLocalizedString("filter.video_filters", comment: "Video Filters")
 

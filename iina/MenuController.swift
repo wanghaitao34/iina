@@ -104,6 +104,7 @@ class MenuController: NSObject, NSMenuDelegate {
   @IBOutlet weak var speedIndicator: NSMenuItem!
   @IBOutlet weak var speedUp: NSMenuItem!
   @IBOutlet weak var speedUpSlightly: NSMenuItem!
+  @IBOutlet weak var speedPreset125x: NSMenuItem?
   @IBOutlet weak var speedDown: NSMenuItem!
   @IBOutlet weak var speedDownSlightly: NSMenuItem!
   @IBOutlet weak var speedReset: NSMenuItem!
@@ -247,9 +248,14 @@ class MenuController: NSObject, NSMenuDelegate {
     jumpToBegin.action = #selector(MainMenuActionHandler.menuJumpToBegin(_:))
     jumpTo.action = #selector(MainMenuActionHandler.menuJumpTo(_:))
 
-    // -- speed
-    [speedUp, speedDown, speedUpSlightly, speedDownSlightly, speedReset].forEach { item in
+    // -- speed presets
+    let speedPresets: [(NSMenuItem?, Double)] = [
+      (speedUp, 2.0), (speedUpSlightly, 1.5), (speedPreset125x, 1.25),
+      (speedReset, 1.0), (speedDownSlightly, 0.75), (speedDown, 0.5)
+    ]
+    speedPresets.forEach { item, speed in
       item?.action = #selector(MainMenuActionHandler.menuChangeSpeed(_:))
+      item?.representedObject = speed
     }
 
     // -- screenshot
@@ -865,11 +871,6 @@ class MenuController: NSObject, NSMenuDelegate {
       (previousFrame, false, ["frame-back-step"], false, nil, nil),
       (nextMedia, false, ["playlist-next"], false, nil, nil),
       (previousMedia, false, ["playlist-prev"], false, nil, nil),
-      (speedUp, false, ["multiply", "speed", "2.0"], true, 1.5...3.0, "speed_up"),
-      (speedUpSlightly, false, ["multiply", "speed", "1.1"], true, 1.01...1.49, "speed_up"),
-      (speedDown, false, ["multiply", "speed", "0.5"], true, 0...0.7, "speed_down"),
-      (speedDownSlightly, false, ["multiply", "speed", "0.9"], true, 0.71...0.99, "speed_down"),
-      (speedReset, false, ["set", "speed", "1.0"], true, nil, nil),
       (abLoop, false, ["ab-loop"], false, nil, nil),
       (fileLoop, false, ["cycle-values", "loop", "\"inf\"", "\"no\""], false, nil, nil),
       (screenshot, false, ["screenshot"], false, nil, nil),

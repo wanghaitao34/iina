@@ -61,6 +61,11 @@ class FontPickerWindowController: NSWindowController, NSTableViewDelegate, NSTab
   override func windowDidLoad() {
     super.windowDidLoad()
 
+    // Liquid Glass font picker
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     let manager = NSFontManager.shared
 
     fontNames = manager.availableFontFamilies

@@ -29,6 +29,11 @@ class GuideWindowController: NSWindowController {
 
   override func windowDidLoad() {
     super.windowDidLoad()
+
+    // Liquid Glass guide window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
   }
 
   func show(pages: [Page]) {

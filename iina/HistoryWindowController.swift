@@ -60,6 +60,11 @@ class HistoryWindowController: NSWindowController, NSOutlineViewDelegate, NSOutl
   override func windowDidLoad() {
     super.windowDidLoad()
 
+    // Liquid Glass history window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     NotificationCenter.default.addObserver(forName: .iinaHistoryUpdated, object: nil, queue: .main) { [unowned self] _ in
       self.reloadData()
     }

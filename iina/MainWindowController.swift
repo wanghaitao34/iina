@@ -180,23 +180,28 @@ class MainWindowController: PlayerWindowController {
 
   // Left and right arrow buttons
 
-  /** The maximum pressure recorded when clicking on the arrow buttons. */
-  var maxPressure: Int32 = 0
+  /** Supported OSC speed presets for left/right speed buttons. */
+  let oscSpeedValues: [Double] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
 
-  /** The value of speedValueIndex before Force Touch. */
-  var oldIndex: Int = AppData.availableSpeedValues.count / 2
-
-  /** When the arrow buttons were last clicked. */
-  var lastClick = Date()
-
-  /** The index of current speed in speed value array. */
-  var speedValueIndex: Int = AppData.availableSpeedValues.count / 2 {
+  /** The index of current speed in `oscSpeedValues`. */
+  var speedValueIndex: Int = 2 {
     didSet {
-      if speedValueIndex < 0 || speedValueIndex >= AppData.availableSpeedValues.count {
-        speedValueIndex = AppData.availableSpeedValues.count / 2
+      if speedValueIndex < 0 || speedValueIndex >= oscSpeedValues.count {
+        speedValueIndex = 2
       }
     }
   }
+
+  /** Temporary state for right speed-button press/hold behavior. */
+  var rightSpeedPressStartedAt: Date?
+  var rightSpeedOriginalIndex: Int = 2
+  var rightSpeedIsTemporarilyBoosting = false
+  var rightSpeedHoldWorkItem: DispatchWorkItem?
+
+  /** Track button press states to avoid handling repeated pressure callbacks. */
+  var leftSpeedButtonIsPressed = false
+  var playButtonPressStartedAt: Date?
+  var playButtonDidToggle = false
 
   /** For force touch action */
   var isCurrentPressInSecondStage = false
@@ -604,8 +609,8 @@ class MainWindowController: PlayerWindowController {
     // init quick setting view now
     let _ = quickSettingView
 
-    // buffer indicator view
-    bufferIndicatorView.roundCorners(withRadius: 10)
+    // buffer indicator view - Liquid Glass
+    bufferIndicatorView.applyLiquidGlassHUD(cornerRadius: LiquidGlass.cornerRadiusMedium)
     updateBufferIndicatorView()
 
     // thumbnail peek view
@@ -613,15 +618,44 @@ class MainWindowController: PlayerWindowController {
     thumbnailPeekView.isHidden = true
 
     // other initialization
-    titleBarBottomBorder.fillColor = NSColor(named: .titleBarBorder)!
+    if #available(macOS 26, *) {
+      titleBarBottomBorder.isHidden = true  // Remove separator for seamless glass look
+    } else {
+      titleBarBottomBorder.fillColor = NSColor(named: .titleBarBorder)!
+    }
     cachedScreenCount = NSScreen.screens.count
     [titleBarView, osdVisualEffectView, controlBarBottom, controlBarFloating, sideBarView, osdVisualEffectView, pipOverlayView].forEach {
       $0?.state = .active
     }
+
+    // Liquid Glass treatment for all overlay surfaces
+    osdVisualEffectView.applyLiquidGlassHUD(cornerRadius: LiquidGlass.cornerRadiusMedium)
+    additionalInfoView.applyLiquidGlassHUD(cornerRadius: LiquidGlass.cornerRadiusMedium)
+    if #available(macOS 26, *) {
+      // Match titlebar style: dark vibrancy for consistent visibility
+      controlBarBottom.material = .titlebar
+      controlBarBottom.blendingMode = .withinWindow
+      controlBarBottom.state = .active
+      controlBarBottom.appearance = NSAppearance(named: .vibrantDark)
+    } else {
+      controlBarBottom.material = .hudWindow
+      controlBarBottom.blendingMode = .withinWindow
+      controlBarBottom.state = .active
+    }
+    if #available(macOS 26, *) {
+      sideBarView.material = .sidebar
+      sideBarView.state = .active
+    }
+    pipOverlayView.applyLiquidGlassHUD(cornerRadius: LiquidGlass.cornerRadiusMedium, addOverlay: false)
+
+    // Titlebar glass effect
+    if #available(macOS 26, *) {
+      titleBarView.material = .hudWindow
+      titleBarView.blendingMode = .withinWindow
+    }
+
     // hide other views
     osdVisualEffectView.isHidden = true
-    osdVisualEffectView.roundCorners(withRadius: 10)
-    additionalInfoView.roundCorners(withRadius: 10)
     leftArrowLabel.isHidden = true
     rightArrowLabel.isHidden = true
     timePreviewWhenSeek.isHidden = true
@@ -2956,7 +2990,7 @@ class MainWindowController: PlayerWindowController {
   override func updatePlayButtonState(paused: Bool) {
     super.updatePlayButtonState(paused: paused)
     if paused {
-      speedValueIndex = AppData.availableSpeedValues.count / 2
+      syncSpeedValueIndexWithCurrentSpeed()
     }
   }
 
@@ -3009,6 +3043,9 @@ class MainWindowController: PlayerWindowController {
       leftArrowButton.setButtonType(.momentaryPushIn)
       rightArrowButton.setButtonType(.momentaryPushIn)
     }
+
+    // Use pressure-capable events so we can distinguish click vs long-press on play.
+    playButton.setButtonType(.multiLevelAccelerator)
   }
 
   override func updateVolume() {
@@ -3021,14 +3058,29 @@ class MainWindowController: PlayerWindowController {
   // MARK: - IBActions
 
   @IBAction override func playButtonAction(_ sender: NSButton) {
-    super.playButtonAction(sender)
-    if player.info.state == .paused {
-      // speed is already reset by playerCore
-      speedValueIndex = AppData.availableSpeedValues.count / 2
-      // set speed to 0 if is fastforwarding
-      if isFastforwarding {
-        player.setSpeed(1)
-        isFastforwarding = false
+    if sender.intValue == 0 {
+      if let startedAt = playButtonPressStartedAt,
+         Date().timeIntervalSince(startedAt) >= minimumPressDuration {
+        applyOscSpeed(index: 2, resumeIfPaused: false)
+      }
+      playButtonPressStartedAt = nil
+      playButtonDidToggle = false
+      return
+    }
+
+    if playButtonPressStartedAt == nil {
+      playButtonPressStartedAt = Date()
+    }
+
+    if !playButtonDidToggle {
+      super.playButtonAction(sender)
+      playButtonDidToggle = true
+      if player.info.state == .paused {
+        syncSpeedValueIndexWithCurrentSpeed()
+        // Clear temporary fast-forward state without altering current playback speed.
+        if isFastforwarding {
+          isFastforwarding = false
+        }
       }
     }
   }
@@ -3052,32 +3104,15 @@ class MainWindowController: PlayerWindowController {
     case .playlist, .seek:
       arrowButtonAction(left: true)
     case .speed:
-      let speeds = AppData.availableSpeedValues.count
-      // If fast forwarding change speed to 1x
-      if speedValueIndex > speeds / 2 {
-        speedValueIndex = speeds / 2
+      if sender.intValue == 0 {
+        if leftSpeedButtonIsPressed {
+          stepOscSpeed(by: -1)
+        }
+        leftSpeedButtonIsPressed = false
+      } else {
+        leftSpeedButtonIsPressed = true
       }
 
-      if sender.intValue == 0 { // Released
-        if maxPressure == 1 &&
-          (speedValueIndex < speeds / 2 - 1 ||
-          Date().timeIntervalSince(lastClick) < minimumPressDuration) { // Single click ended, 2x speed
-          speedValueIndex = oldIndex - 1
-        } else { // Force Touch or long press ended
-          speedValueIndex = speeds / 2
-        }
-        maxPressure = 0
-      } else {
-        if sender.intValue == 1 && maxPressure == 0 { // First press
-          oldIndex = speedValueIndex
-          speedValueIndex -= 1
-          lastClick = Date()
-        } else { // Force Touch
-          speedValueIndex = max(oldIndex - Int(sender.intValue), 0)
-        }
-        maxPressure = max(maxPressure, sender.intValue)
-      }
-      arrowButtonAction(left: true)
     }
   }
 
@@ -3095,32 +3130,40 @@ class MainWindowController: PlayerWindowController {
     case .playlist, .seek:
       arrowButtonAction(left: false)
     case .speed:
-      let speeds = AppData.availableSpeedValues.count
-      // If rewinding change speed to 1x
-      if speedValueIndex < speeds / 2 {
-        speedValueIndex = speeds / 2
+      if sender.intValue == 0 {
+        rightSpeedHoldWorkItem?.cancel()
+        rightSpeedHoldWorkItem = nil
+        if rightSpeedPressStartedAt != nil {
+          if rightSpeedIsTemporarilyBoosting {
+            applyOscSpeed(index: rightSpeedOriginalIndex)
+          } else {
+            stepOscSpeed(by: 1)
+          }
+        }
+        rightSpeedPressStartedAt = nil
+        rightSpeedIsTemporarilyBoosting = false
+      } else {
+        if rightSpeedPressStartedAt == nil {
+          rightSpeedPressStartedAt = Date()
+          rightSpeedOriginalIndex = nearestOscSpeedIndex(for: player.info.playSpeed)
+          rightSpeedIsTemporarilyBoosting = false
+
+          let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self, self.rightSpeedPressStartedAt != nil else { return }
+            self.rightSpeedIsTemporarilyBoosting = true
+            self.applyOscSpeed(index: self.oscSpeedValues.count - 1)
+          }
+          rightSpeedHoldWorkItem = workItem
+          DispatchQueue.main.asyncAfter(deadline: .now() + minimumPressDuration, execute: workItem)
+        }
+
+        // Force/long press: temporarily boost to 2x; release restores original speed.
+        if sender.intValue > 1 {
+          rightSpeedIsTemporarilyBoosting = true
+          applyOscSpeed(index: oscSpeedValues.count - 1)
+        }
       }
 
-      if sender.intValue == 0 { // Released
-        if maxPressure == 1 &&
-          (speedValueIndex > speeds / 2 + 1 ||
-          Date().timeIntervalSince(lastClick) < minimumPressDuration) { // Single click ended
-          speedValueIndex = oldIndex + 1
-        } else { // Force Touch or long press ended
-          speedValueIndex = speeds / 2
-        }
-        maxPressure = 0
-      } else {
-        if sender.intValue == 1 && maxPressure == 0 { // First press
-          oldIndex = speedValueIndex
-          speedValueIndex += 1
-          lastClick = Date()
-        } else { // Force Touch
-          speedValueIndex = min(oldIndex + Int(sender.intValue), speeds - 1)
-        }
-        maxPressure = max(maxPressure, sender.intValue)
-      }
-      arrowButtonAction(left: false)
     }
   }
 
@@ -3128,13 +3171,7 @@ class MainWindowController: PlayerWindowController {
   func arrowButtonAction(left: Bool) {
     switch arrowBtnFunction {
     case .speed:
-      isFastforwarding = true
-      let speedValue = AppData.availableSpeedValues[speedValueIndex]
-      player.setSpeed(speedValue)
-      // if is paused
-      if player.info.state == .paused {
-        player.resume()
-      }
+      stepOscSpeed(by: left ? -1 : 1)
 
     case .playlist:
       player.navigateInPlaylist(nextMedia: !left)
@@ -3143,6 +3180,39 @@ class MainWindowController: PlayerWindowController {
       player.seek(relativeSecond: left ? -10 : 10, option: .relative)
 
     }
+  }
+
+  private func nearestOscSpeedIndex(for speed: Double) -> Int {
+    var nearestIndex = 0
+    var nearestDistance = Double.greatestFiniteMagnitude
+
+    for (index, value) in oscSpeedValues.enumerated() {
+      let distance = abs(value - speed)
+      if distance < nearestDistance {
+        nearestDistance = distance
+        nearestIndex = index
+      }
+    }
+    return nearestIndex
+  }
+
+  private func syncSpeedValueIndexWithCurrentSpeed() {
+    speedValueIndex = nearestOscSpeedIndex(for: player.info.playSpeed)
+  }
+
+  private func applyOscSpeed(index: Int, resumeIfPaused: Bool = true) {
+    let clampedIndex = max(0, min(index, oscSpeedValues.count - 1))
+    speedValueIndex = clampedIndex
+    player.setSpeed(oscSpeedValues[clampedIndex])
+    isFastforwarding = false
+    if resumeIfPaused && player.info.state == .paused {
+      player.resume()
+    }
+  }
+
+  private func stepOscSpeed(by delta: Int) {
+    syncSpeedValueIndexWithCurrentSpeed()
+    applyOscSpeed(index: speedValueIndex + delta)
   }
 
   func updateSpeedLabel(speed: Double) {

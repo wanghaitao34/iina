@@ -85,6 +85,11 @@ class InspectorWindowController: NSWindowController, NSWindowDelegate, NSTableVi
   override func windowDidLoad() {
     super.windowDidLoad()
 
+    // Liquid Glass inspector window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+    }
+
     watchProperties = Preference.array(for: .watchProperties) as! [String]
     watchTableView.delegate = self
     watchTableView.dataSource = self

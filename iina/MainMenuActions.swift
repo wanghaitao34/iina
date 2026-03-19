@@ -81,9 +81,8 @@ class MainMenuActionHandler: NSResponder, NSMenuItemValidation {
 extension MainMenuActionHandler {
   @objc func menuTogglePause(_ sender: NSMenuItem) {
     player.togglePause()
-    // set speed to 0 if is fastforwarding
+    // Clear temporary fast-forward state without altering current playback speed.
     if player.mainWindow.isFastforwarding {
-      player.setSpeed(1)
       player.mainWindow.isFastforwarding = false
     }
   }
@@ -119,12 +118,8 @@ extension MainMenuActionHandler {
   }
 
   @objc func menuChangeSpeed(_ sender: NSMenuItem) {
-    if sender.tag == 5 {
-      player.setSpeed(1)
-      return
-    }
-    if let multiplier = sender.representedObject as? Double {
-      player.setSpeed(player.info.playSpeed * multiplier)
+    if let speed = sender.representedObject as? Double {
+      player.setSpeed(speed)
     }
   }
 

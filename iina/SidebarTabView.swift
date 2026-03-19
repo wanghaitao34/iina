@@ -28,7 +28,12 @@ class SidebarTabView: NSViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     view.wantsLayer = true
-    view.layer?.cornerRadius = 10
+    if #available(macOS 26, *) {
+      view.layer?.cornerRadius = LiquidGlass.cornerRadiusSmall
+      view.layer?.cornerCurve = .continuous
+    } else {
+      view.layer?.cornerRadius = 10
+    }
     updateStyle()
     label.stringValue = name
   }
@@ -39,13 +44,28 @@ class SidebarTabView: NSViewController {
   }
 
   private func updateStyle() {
-    let background = NSColor.controlBackgroundColor
-    if isActive {
-      view.layer?.backgroundColor = background.withAlphaComponent(0.2).cgColor
-      label.textColor = .textColor
+    if #available(macOS 26, *) {
+      // Liquid Glass tab styling
+      if isActive {
+        view.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.15).cgColor
+        view.layer?.borderWidth = 0.5
+        view.layer?.borderColor = NSColor.white.withAlphaComponent(0.25).cgColor
+        label.textColor = .textColor
+      } else {
+        view.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.05).cgColor
+        view.layer?.borderWidth = 0
+        view.layer?.borderColor = nil
+        label.textColor = NSColor.textColor.withAlphaComponent(0.5)
+      }
     } else {
-      view.layer?.backgroundColor = background.withAlphaComponent(0.1).cgColor
-      label.textColor = NSColor.textColor.withAlphaComponent(0.5)
+      let background = NSColor.controlBackgroundColor
+      if isActive {
+        view.layer?.backgroundColor = background.withAlphaComponent(0.2).cgColor
+        label.textColor = .textColor
+      } else {
+        view.layer?.backgroundColor = background.withAlphaComponent(0.1).cgColor
+        label.textColor = NSColor.textColor.withAlphaComponent(0.5)
+      }
     }
   }
 }

@@ -21,11 +21,49 @@ class ControlBarView: NSVisualEffectView {
 
   override func awakeFromNib() {
     if #available(macOS 26, *) {
-      self.roundCorners(withRadius: 10)
+      applyLiquidGlassEffect()
     } else {
-      self.roundCorners(withRadius: 6)
+      applyFrostedGlassEffect()
     }
     self.translatesAutoresizingMaskIntoConstraints = false
+  }
+
+  /// Apple-style frosted glass for pre-macOS 26
+  private func applyFrostedGlassEffect() {
+    material = .hudWindow
+    blendingMode = .withinWindow
+    state = .active
+    self.roundCorners(withRadius: 16)
+
+    wantsLayer = true
+    layer?.borderWidth = 0.5
+    layer?.borderColor = NSColor.white.withAlphaComponent(0.25).cgColor
+
+    let glassShadow = NSShadow()
+    glassShadow.shadowBlurRadius = 20
+    glassShadow.shadowOffset = NSSize(width: 0, height: -4)
+    glassShadow.shadowColor = NSColor.black.withAlphaComponent(0.4)
+    shadow = glassShadow
+  }
+
+  @available(macOS 26, *)
+  private func applyLiquidGlassEffect() {
+    // Aggressive Liquid Glass: full translucent glass with deep depth
+    material = .hudWindow
+    blendingMode = .withinWindow
+    state = .active
+    roundCorners(withRadius: LiquidGlass.cornerRadiusLarge)
+
+    // Multi-layer shadow for maximum depth perception
+    let outerShadow = NSShadow()
+    outerShadow.shadowBlurRadius = 36
+    outerShadow.shadowOffset = NSSize(width: 0, height: -10)
+    outerShadow.shadowColor = NSColor.black.withAlphaComponent(0.6)
+    shadow = outerShadow
+
+    // Hairline glass rim + top specular highlight + inner glow overlay
+    let overlay = GlassOverlayView(frame: bounds, cornerRadius: LiquidGlass.cornerRadiusLarge)
+    addSubview(overlay)
   }
 
   override func mouseDown(with event: NSEvent) {
@@ -76,3 +114,6 @@ class ControlBarView: NSVisualEffectView {
   }
 
 }
+
+// MARK: - Liquid Glass Overlay (macOS 26+)
+// Now uses shared GlassOverlayView from LiquidGlassEffect.swift

@@ -20,12 +20,24 @@ class FixedProgressBar: NSView {
   override func draw(_ dirtyRect: NSRect) {
     NSGraphicsContext.saveGraphicsState()
 
-    NSColor.controlAccentColor.setFill()
-
     let boundRect = NSMakeRect(0, paddingY, bounds.width, bounds.height - 2 * paddingY)
     let progressRect = NSMakeRect(0, paddingY, bounds.width * doubleValue, bounds.height - 2 * paddingY)
-    NSBezierPath(roundedRect: boundRect, xRadius: 3, yRadius: 3).addClip()
-    NSBezierPath(rect: progressRect).fill()
+
+    if #available(macOS 26, *) {
+      // Liquid Glass: translucent track with glass-like progress fill
+      let trackRadius: CGFloat = boundRect.height / 2
+      let trackPath = NSBezierPath(roundedRect: boundRect, xRadius: trackRadius, yRadius: trackRadius)
+      NSColor.white.withAlphaComponent(0.1).setFill()
+      trackPath.fill()
+
+      trackPath.addClip()
+      NSColor.controlAccentColor.setFill()
+      NSBezierPath(rect: progressRect).fill()
+    } else {
+      NSColor.controlAccentColor.setFill()
+      NSBezierPath(roundedRect: boundRect, xRadius: 3, yRadius: 3).addClip()
+      NSBezierPath(rect: progressRect).fill()
+    }
 
     NSGraphicsContext.restoreGraphicsState()
   }

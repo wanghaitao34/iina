@@ -59,6 +59,12 @@ class AboutWindowController: NSWindowController {
     window?.titlebarAppearsTransparent = true
     window?.titleVisibility = .hidden
 
+    // Liquid Glass about window
+    if #available(macOS 26, *) {
+      window?.titlebarSeparatorStyle = .none
+      window?.backgroundColor = .clear
+    }
+
     windowBackgroundBox.fillColor = .windowBackgroundColor
     iconImageView.image = NSApp.applicationIconImage
 

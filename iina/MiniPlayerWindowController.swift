@@ -117,6 +117,21 @@ class MiniPlayerWindowController: PlayerWindowController, NSPopoverDelegate {
     closeButtonBox.action = #selector(self.close)
     closeButtonBackgroundViewVE.roundCorners(withRadius: 8)
 
+    // Liquid Glass treatment for mini player
+    if #available(macOS 26, *) {
+      backgroundView.material = .hudWindow
+      backgroundView.blendingMode = .withinWindow
+      backgroundView.state = .active
+
+      playlistWrapperView.material = .hudWindow
+      playlistWrapperView.blendingMode = .withinWindow
+      playlistWrapperView.state = .active
+
+      closeButtonBackgroundViewVE.material = .hudWindow
+      closeButtonBackgroundViewVE.blendingMode = .withinWindow
+      closeButtonBackgroundViewVE.roundCorners(withRadius: LiquidGlass.cornerRadiusMini)
+    }
+
     // hide controls initially
     closeButtonBackgroundViewBox.isHidden = true
     closeButtonView.alphaValue = 0

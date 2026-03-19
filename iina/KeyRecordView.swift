@@ -27,7 +27,14 @@ class KeyRecordView: NSView {
   override func awakeFromNib() {
     wantsLayer = true
     layer?.backgroundColor = NSColor.keyRecordViewBackgroundActive.cgColor
-    layer?.cornerRadius = 4
+    if #available(macOS 26, *) {
+      layer?.cornerRadius = 8
+      layer?.cornerCurve = .continuous
+      layer?.borderWidth = 0.5
+      layer?.borderColor = NSColor.white.withAlphaComponent(0.15).cgColor
+    } else {
+      layer?.cornerRadius = 4
+    }
   }
 
   override func updateLayer() {
